@@ -9,11 +9,14 @@ const app = express();
 const compiler = webpack(config);
 const port = 1337;
 
-app.use(new WebpackDevServer(webpack(config), {
-	publicPath: config.output.publicPath,
+app.use(require('webpack-dev-middleware')(compiler, {
+  noInfo: true,
+  publicPath: config.output.publicPath,
 	hot: true,
 	historyApiFallback: true
 }));
+
+app.use(require('webpack-hot-middleware')(compiler));
 
 app.use(require('webpack-hot-middleware')(compiler));
 
