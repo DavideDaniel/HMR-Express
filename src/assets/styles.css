@@ -2,14 +2,6 @@ body {
   padding-top: 50px;
   padding-left: 50px;
 }
-.bar {
-  display: inline-block;
-}
-#barChart {
-  width: 600px;
-  height: 250px;
-  background-color: #EFE;
-}
 #content {
   width: 600px;
   height: 400px;

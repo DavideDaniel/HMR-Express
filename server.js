@@ -1,21 +1,26 @@
-var path = require('path');
-var express = require('express');
-var webpack = require('webpack');
-var config = require('./config/webpack.config.js');
+'use strict';
+const path = require('path');
+const express = require('express');
+const webpack = require('webpack');
+const config = require('./config/webpack.config.js');
 
-var port = 3000;
+const port = 3000;
 
-var app = express();
-var compiler = webpack(config);
+const app = express();
+const compiler = webpack(config);
 
 app.use(require('webpack-dev-middleware')(compiler, {
   noInfo: true,
 	hot: true,
-	debug:true,
+	filename: 'bundle.js',
   publicPath: config.output.publicPath
 }));
 
-app.use(require('webpack-hot-middleware')(compiler));
+app.use(require('webpack-hot-middleware')(compiler,{
+	path: '/__webpack_hmr',
+	log: console.log,
+	heartbeat: 10 * 1000
+}));
 
 app.get('*', function (req, res) {
   res.sendFile(path.join(__dirname, './public/index.html'));
