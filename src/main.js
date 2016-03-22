@@ -11,6 +11,44 @@ const dataSet = _.map(_.range(25), () => {
   };
 });
 
+var newData;
+
+
+// // cover promises and async functionality
+// d3.json('http://54.213.83.132/hackoregon/http/current_candidate_transactions/931/', (e) => {
+//   newData = e;
+//   return newData;
+// });
+// setTimeout(()=>{console.log(newData);},5000)
+
+var promisedData = new Promise((resolve, reject)=>{
+ d3.json('http://54.213.83.132/hackoregon/http/current_candidate_transactions/931/',(json)=>{
+    resolve(json)
+  });
+});
+
+// promisedData.then(value => {console.log(value)});
+
+let formattedData;
+
+promisedData
+  .then(value => {
+  let data = value.map(item => {
+    return {
+      date: d3.time.format('%Y-%m-%d').parse(item.filed_date),
+      amount: item.amount
+    }
+  })
+  return data;
+  }).then(value => {
+    // return value;
+    console.log(value[0])
+  });
+
+// console.log(formattedData);
+
+
+
 // all d3 code below
 const margin = {
   top: 0,
@@ -52,11 +90,10 @@ svg.selectAll('circle')
     return data.radius;
   });
 
-
 /*
-* ignore this code below - it's for webpack to know that this
-* code needs to be watched and not to append extra elements
-*/
+ * ignore this code below - it's for webpack to know that this
+ * code needs to be watched and not to append extra elements
+ */
 const duplicateNode = document.querySelector('svg');
 if (module.hot) {
   module.hot.accept();
