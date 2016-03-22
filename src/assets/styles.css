@@ -1,6 +1,13 @@
 body {
   padding-top: 50px;
-  padding-left: 50px;
+  padding-left: 100px;
+}
+g {
+  font-family: Lato;
+  font-size: 12px;
+}
+.bar {
+  display: inline-block;
 }
 #content {
   width: 600px;
@@ -13,4 +20,15 @@ body {
   fill-opacity: 0.5;
   stroke: black;
   stroke-weight: 1px;
+}
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+.highlight {
+  fill: gold;
+  fill-opacity: 1;
+  stroke-weight: 2px;
 }
