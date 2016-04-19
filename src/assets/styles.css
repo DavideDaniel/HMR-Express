@@ -1,34 +1,20 @@
 body {
-  padding-top: 50px;
-  padding-left: 100px;
+  padding: 5rem;
+  margin: 0 auto;
+  font: .75rem sans-serif;
 }
-g {
-  font-family: Lato;
-  font-size: 12px;
-}
-.bar {
-  display: inline-block;
-}
-#content {
-  width: 600px;
-  height: 400px;
-  background-color: #EFE;
-}
-.bubble {
-  display: inline-block;
-  fill: tomato;
-  fill-opacity: 0.5;
-  stroke: black;
-  stroke-weight: 1px;
-}
-.axis path, .axis line {
+
+.axis path,
+.axis line {
   fill: none;
   stroke: #000;
-  stroke-width: 1px;
   shape-rendering: crispEdges;
 }
-.highlight {
-  fill: gold;
-  fill-opacity: 1;
-  stroke-weight: 2px;
+
+.bar {
+  fill: #000;
+}
+
+.x.axis path {
+  display: none;
 }
