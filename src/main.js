@@ -37,8 +37,7 @@ const svg = d3.select("body")
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-//
-//
+  
   // using queue to collect multiple data sets
   const collectData = new Promise((resolve, reject) => {
        queue()
@@ -127,7 +126,12 @@ const keyNames = d3.keys(dataSet[0])
     })
     .style("fill", (d) => {
       return color(d.name);
-    });
+    })
+    .append("text")
+    .style("text-anchor","end")
+    .text(d => d.value)
+    .attr('y' )
+
 //
 //   // draw legend
   const legend = svg.selectAll(".legend")
@@ -155,12 +159,10 @@ const keyNames = d3.keys(dataSet[0])
 //
 collectData // promise - not a function
   .then(value => {
-    // console.log(value)
     return visualize(value);
-  })
-//   .then(value => {
+  }).then(value => {
 //     // what else can we do?
-//   });
+  });
 
 
 /*
