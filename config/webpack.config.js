@@ -3,7 +3,8 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=10000', './src/main'],
+  devtool: 'cheap-module-source-map',
+  entry: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=10000', './src/main', './src/remove'],
   output: {
     path: path.join(__dirname, '../public'),
     filename: 'bundle.js',
@@ -12,8 +13,12 @@ module.exports = {
   module: {
     loaders: [{
       test: /\.js$/,
-      loaders: ['babel'],
-      include: path.join(__dirname, '../src')
+      loader: 'babel-loader',
+      include: path.join(__dirname, '../src'),
+      query: {
+        plugins: ['transform-runtime'],
+        presets: ['es2015','stage-0']
+      }
     }, {
       test: /\.css$/,
       loader: 'style-loader!css-loader',

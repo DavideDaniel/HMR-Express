@@ -28,6 +28,5 @@ app.get('*', function (req, res) {
 
 app.listen(port, function (error) {
   if (error) throw error;
-
   console.log('server running at http://localhost:', port);
 });

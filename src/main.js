@@ -1,111 +1,192 @@
 import d3 from 'd3';
+import './assets/normalize.css';
 import './assets/styles.css';
-import { queue } from 'd3-queue';
-// import * as d3_request from 'd3-request';
-window.queue = queue;
-// window.request = d3_request;
-// const collectData = new Promise((resolve, reject) => {
-//      queue()
-//        .defer(d3.csv, './hackORVolunteers.csv')
-//        .await((err, a) => {
-//          if(err){
-//            reject(err);
-//          }
-//          let dataSet = [...a]; // spread operator
-//          resolve(dataSet);
-//        });
-//    });
 
-// collectData.then(value => {
-//   console.log(value);
-// })
+// url to be changed
+let URL = 'http://54.213.83.132/hackoregon/http/state_sum_by_date/_/';
 
-d3.csv('./hackORVolunteers.csv', function(d){
-  console.log(d)
-   return {
-     response: d["What motivated you most to volunteer with Hack Oregon?"].split(',')
-     }
-   }, function(err,rows){
-   var hashSet = {}
-   var num = 0;
+// variables for data
+let DATA_SET;
+let DATA_SET_WEEK;
 
-   for (var i = 0; i < rows.length; i++) {
-     var response = rows[i].response;
-     for (var j = 0; j < response.length; j++) {
-       var answer = response[j].trim();
-       if(!Object.keys(hashSet).includes(answer)){
-         hashSet[answer] = 1;
-       } else {
-         hashSet[answer] = hashSet[answer]+1;
-       }
-     }
-   }
-   console.log(hashSet)
-});
-  //  var dataSet = Object.keys(hashSet).map(function(item){
-  //    if (key);
-  //  })
+// container
+const container = document.getElementById('content');
 
+// margin values
+const margin = {
+  top: 20,
+  right: 50,
+  bottom: 30,
+  left: 70
+};
 
+// setting the width & height
+const width = container.clientWidth - margin.left - margin.right;
+const height = container.clientHeight - margin.top - margin.bottom;
 
-  // var data = d3.csv.parse('hackORVolunteers.csv');
+// svg function
+const svg = d3
+  .select('#content')
+  .append('svg')
+  .attr('width', width + margin.left + margin.right)
+  .attr('height', height + margin.top + margin.bottom)
+  .append('g')
+  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-// //get variable names
-//   var keys = d3.keys(data[0]);
-//               var namesTitle = keys[0];
-//               var valuesTitle = keys[1];
-//
-//               //accessing the properties of each object with the variable name through its key
-//               var values = function(d) {return +d[valuesTitle];};
-//               var names = function(d) {return d[namesTitle];}
-// console.log(dirtyCSV);
-// var height = 250; // set vars for height & width
-// var width = 600;
-//
-// var yScale = d3.scale.linear()
-//   .domain([0, d3.max(dataSet)*1.1]) // domain now with d3.max
-//   .range([0, height]) // set yScale linear
-// var xScale = d3.scale.ordinal() // orders
-//   .domain(dataSet)
-//   .rangeBands([0, width], 0.25, 0.25); // (width of data), padding between, padding outside
-//
-//   var colorScale = d3.scale.linear() // linear - min / max
-//   //.domain([0,d3.max(dataSet)]) // for data based
-//   .domain([0,dataSet.length]) // for position based
-//   .range(['tomato','cornflowerBlue'])
-//
-// var svg = d3.select('#barChart').append('svg')
-//   .attr('width', width)
-//   .attr('height', height)
-//
-// svg.selectAll('rect')
-//   .data(dataSet)
-//   .enter()
-//   .append('rect')
-//   .attr('class', 'bar')
-//   .attr('x', function(data, index) {
-//     return xScale(data) // using xScale on data
-//   })
-//   .attr('y', function(data) {
-//     return height - yScale(data) // using yScale on data
-//   })
-//   .attr('width', xScale.rangeBand) // width determined by xScale.rangeBand
-//   .style('height', function(data) {
-//     return yScale(data) // height determined by yScale
-//   })
-//   .attr('fill', function(data,i) {
-//    // return colorScale(data) // for data based
-//     return colorScale(i) // for position based
-//   })
-// });
-/*
- * ignore this code below - it's for webpack to know that this
- * code needs to be watched and not to append extra elements
- */
-const duplicateNode = document.querySelector('svg');
-if (module.hot) {
-  module.hot.accept();
-  module.hot.dispose(() => {
-    duplicateNode.parentNode.removeChild(duplicateNode);
-  });
+// line function
+const line = d3.svg.line()
+  .x(d => xScale(d.date))
+  .y(d => yScale(d.amount))
+  .interpolate('linear');
+
+// functions for scale
+const xScale = d3.time.scale()
+  .range([0, width]);
+const yScale = d3.scale.linear()
+  .range([height - 2, 0]);
+
+// functions for the axes
+const xAxis = d3.svg.axis()
+  .scale(xScale)
+  .orient('bottom')
+const yAxis = d3.svg.axis()
+  .scale(yScale)
+  .orient('left')
+  .ticks(10);
+
+// parse into date, sort dates
+const parseDate = d3.time.format('%Y-%m-%d').parse;
+const sortByDates = (a, b) => (a.date - b.date);
+
+// fetch function
+const getData = async(id) => {
+  // ternary
+  //  if id is truthy ? true return value : false return value; -- similar to if else
+  URL = id ? `http://54.213.83.132/hackoregon/http/current_candidate_transactions_out/${id}/` : 'http://54.213.83.132/hackoregon/http/state_sum_by_date/_/';
+  const fetchedData = await $.getJSON(URL);
+  DATA_SET = await formatData(fetchedData);
+  DATA_SET_WEEK = await groupByWeeks(DATA_SET);
+  return DATA_SET;
 }
+
+// functions to format the data
+const formatData = (data) => data.map(item => ({
+    date: parseDate(item.tran_date),
+    amount: item.total_out || item.amount
+  }))
+  .sort(sortByDates);
+
+const groupByWeeks = (data) => {
+  const minDate = data[0].date;
+  const maxDate = data[data.length - 1].date;
+  const weeks = d3.time.weeks(minDate, maxDate);
+  let weeklyArr = [];
+  for (let i = 0; i < weeks.length; i++) {
+    let week = {
+      amount: 0,
+      date: weeks[i]
+    };
+    const range = moment.range(weeks[i], weeks[i + 1]);
+    for (let j = 0; j < data.length; j++) {
+      if (moment(data[j].date)
+        .within(range)) {
+        week.amount += data[j].amount;
+      }
+    }
+    weeklyArr.push(week);
+  }
+  DATA_SET_WEEK = weeklyArr;
+  return DATA_SET_WEEK;
+}
+
+// function to visualize the data
+const visualize = (data, opt) => {
+  const dates = data.map(d => d.date);
+  const amounts = data.map(d => d.amount);
+
+  yScale.domain(d3.extent(amounts));
+  xScale.domain(d3.extent(dates));
+
+  const updateSvg = d3.select('#content')
+    .transition();
+  updateSvg.select('.line')
+    .duration(1000)
+    .attr('d', line(data));
+  updateSvg.select('.x.axis')
+    .duration(1000)
+    .call(xAxis)
+  updateSvg.select('.y.axis')
+    .duration(1000)
+    .call(yAxis);
+}
+
+const visualizeWithChoice = (data) => {
+  if(data){
+    DATA_SET = data;
+    DATA_SET_WEEK = groupByWeeks(data);
+  }
+  switch ($('select option:selected')
+    .val()) {
+  case 'Days':
+    return visualize(DATA_SET);
+  case 'Weeks':
+    return visualize(DATA_SET_WEEK);
+  default:
+  }
+}
+
+
+// initial appending of svg and data
+d3.json(URL, json => {
+    const data = formatData(json);
+    svg.append('path')
+      .attr('class', 'line')
+      .attr('d', line(data));
+    svg.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(xAxis);
+    svg.append('g')
+      .attr('class', 'y axis')
+      .call(yAxis);
+    return visualizeWithChoice(data);
+  });
+
+// functions for the page interactions
+$('#options')
+  .on('change', (event, index, value) => {
+    return visualizeWithChoice();
+  });
+
+$('#allState')
+  .on('click', async () => {
+    try {
+      await getData();
+      return visualizeWithChoice();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      return $('#filerId')
+        .val('');
+    }
+  });
+
+$('#submitFiler')
+  .on('click', async () => {
+    try {
+      const $filerId = await $('#filerId');
+      const filerId = await $filerId.val();
+      if(filerId){
+        await getData(filerId);
+        return visualizeWithChoice();
+      } else {
+        alert('Must have an id');
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      // return visualizeWithChoice();
+      return $('#filerId')
+        .val('');
+    }
+  });

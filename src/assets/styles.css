@@ -1,20 +1,109 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
-  padding: 5rem;
-  margin: 0 auto;
-  font: .75rem sans-serif;
+    padding: 0;
+    margin: 0;
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #606c71;
+}
+
+:focus {
+  outline: none;
+  outline-color: none;
+  outline-style: none;
+  outline-width: 0;
+}
+
+a {
+    color: #1e6bb8;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.btn {
+    display: inline-block;
+    color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(220, 225, 225, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 0.2rem;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+}
+
+.btn+ .btn {
+    margin-left: .25rem;
+}
+
+.btn:hover {
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+@media screen and (min-width: 64em) {
+    .btn {
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media screen and (min-width: 42em) and (max-width: 64em) {
+    .btn {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media screen and (max-width: 42em) {
+    .btn {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    .btn+ .btn {
+        margin-top: 1rem;
+        margin-left: 0;
+    }
+}
+
+#content {
+    width: 100%;
+    height: 80vh;
+    background-color: #F2F9FC;
 }
 
 .axis path,
 .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+    fill: none;
+    stroke: #000;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
 }
 
-.bar {
-  fill: #000;
+g {
+    font-family: 'Open Sans';
+    font-size: 11px;
 }
 
-.x.axis path {
-  display: none;
+.line {
+    stroke: tomato;
+    stroke-width: 1px;
+    fill: none;
 }
+
+.inputs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
