@@ -1,46 +1,78 @@
 import d3 from 'd3';
 import './assets/normalize.css';
 import './assets/styles.css';
-const colorBlend = d3.interpolateRgb('#CDF3F2', '#08519c');
+import data from './example';
 
-function donorPercent(amount,donors) {
-  // at 0 it should be size: 0%, color: #fff
-  if(!amount) {
-    return  {
-      size: '0%',
-      color: '#fff'
-    }
-  }
+const width = 960,
+  height = 500,
+  nodeRadius = 10,
+  margin = {
+    left: 50,
+    top: 10,
+    bottom: 10,
+    right: 40
+  };
 
-  //  value of the highest donor
-  let donorMax = d3.max(donors, d => d.value);
-  console.log(donorMax);
-  let donorSize = d3.scale.linear().domain([0,donorMax]).range([0,1]);
-  console.log(donorSize);
+const svg = d3.select('body')
+  .append("svg")
+  .attr({
+    width: width,
+    height: height
+  });
 
-  return {
-    size: `${100 * donorSize(amount)}%`,
-    color: colorBlend(donorSize(amount))
-  }
+const mainGroup = svg.append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ')');
 
-  // % for size
-  // size: '100%'
-  // color
-  // color: '#08519c'
+const tree = d3.layout.tree()
+  .size([
+    height - (margin.bottom + margin.top),
+    width - (margin.left + margin.right),
+  ]);
 
-}
+const nodes = tree.nodes(data);
 
-// dummy data
+const links = tree.links(nodes);
 
-const donors = [
-  {"name":"John Arnold","value":2750000},
-  {"name":"Michael Bloomberg","value":2385000},
-  {"name":"Loren Parks","value":896800},
-  {"name":"Connie Ballmer","value":505000},
-  {"name":"Tom Hormel","value":500000},
+const diagonal = d3.svg.diagonal()
+  .projection(datum => {
+    return [datum.y, datum.x];
+  });
 
-];
-// {"name":"John K", "value":25}
-console.log(donorPercent(250000, donors));
-
-
+mainGroup.selectAll('path')
+  .data(links)
+  .enter()
+  .append('path', 'g')
+  .attr({
+    d: diagonal,
+    fill: 'none',
+    stroke: 'cornflowerblue',
+    'stroke-width': 1
+  });
+const circleGroups = mainGroup.selectAll('g')
+  .data(nodes)
+  .enter()
+  .append('g')
+  .attr('transform', datum => {
+    return 'translate(' + datum.y + ',' + datum.x + ')';
+  });
+circleGroups.append('circle')
+  .attr({
+    r: nodeRadius,
+    fill: '#fff',
+    stroke: 'tomato',
+    'stroke-width': 1,
+  });
+circleGroups.append('text')
+  .text(datum => {
+    return datum.name;
+  })
+  .attr('y', datum => {
+    return datum.children || datum._children ?
+      -nodeRadius * 2 : nodeRadius * 2;
+  })
+  .attr({
+    dy: '.35em',
+    'text-anchor': 'middle',
+    'fill-opacity': 1
+  })
+  .style('font', '12px Open Sans');
