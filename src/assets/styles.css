@@ -17,3 +17,9 @@ body {
   outline-style: none;
   outline-width: 0;
 }
+
+svg g text {
+  font: 12px 'Open Sans';
+  dy: 1em;
+  /*text-anchor: middle;*/
+}

@@ -3,76 +3,98 @@ import './assets/normalize.css';
 import './assets/styles.css';
 import data from './example';
 
-const width = 960,
-  height = 500,
-  nodeRadius = 10,
-  margin = {
-    left: 50,
-    top: 10,
-    bottom: 10,
-    right: 40
-  };
+// constants
+const width = 1000;
+const height = 400;
+const margin = {
+  top: 10,
+  left: 80,
+  bottom: 10,
+  right: 200
+};
+const nodeRadius = 6;
 
-const svg = d3.select('body')
-  .append("svg")
+// basic svg appended
+const svg = d3.select('#content')
+  .append('svg')
   .attr({
     width: width,
     height: height
   });
 
-const mainGroup = svg.append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ')');
-
+// layout for tree
 const tree = d3.layout.tree()
-  .size([
-    height - (margin.bottom + margin.top),
-    width - (margin.left + margin.right),
-  ]);
+  .size(
+    [height - (margin.bottom + margin.top),
+      width - (margin.left + margin.right)
+    ]);
 
+// tree has nodes (elements or people etc..)
 const nodes = tree.nodes(data);
-
+// & links(relationships)
 const links = tree.links(nodes);
 
+// diagonal cubic Bézier path generator to connect nodes + links
 const diagonal = d3.svg.diagonal()
-  .projection(datum => {
-    return [datum.y, datum.x];
-  });
+  .projection(datum => [datum.y, datum.x]);
 
-mainGroup.selectAll('path')
+// because I hate writing out string interpolations
+const translate = (a, b) => `translate(${a},${b})`;
+
+// start drawing the links group first
+const linksGroup = svg.append('g')
+  .attr('transform', translate(margin.left, margin.top))
+
+// it is important to draw our links path first
+linksGroup.selectAll('path')
   .data(links)
   .enter()
   .append('path', 'g')
   .attr({
-    d: diagonal,
+    d: diagonal, // path data is generated with diagonal
     fill: 'none',
     stroke: 'cornflowerblue',
     'stroke-width': 1
   });
-const circleGroups = mainGroup.selectAll('g')
+// try switching them to see what happens and think about why that happened
+
+// draw the nodes group next
+const nodesGroup = linksGroup.selectAll('g')
   .data(nodes)
   .enter()
   .append('g')
-  .attr('transform', datum => {
-    return 'translate(' + datum.y + ',' + datum.x + ')';
-  });
-circleGroups.append('circle')
+  .attr('transform', datum => translate(datum.y, datum.x));
+
+// append a shape for the nodes themselves
+nodesGroup.append('circle') // you can choose other shapes
   .attr({
-    r: nodeRadius,
+    r: nodeRadius, // radius is determined by our constant
     fill: '#fff',
     stroke: 'tomato',
-    'stroke-width': 1,
+    'stroke-width': 1
   });
-circleGroups.append('text')
-  .text(datum => {
-    return datum.name;
-  })
-  .attr('y', datum => {
-    return datum.children || datum._children ?
-      -nodeRadius * 2 : nodeRadius * 2;
-  })
-  .attr({
-    dy: '.35em',
-    'text-anchor': 'middle',
-    'fill-opacity': 1
-  })
-  .style('font', '12px Open Sans');
+
+// append labels next
+nodesGroup.append('text')
+  .text(datum => datum.name)
+  .attr('y', datum => datum.children ? (-nodeRadius * 2) : (nodeRadius))
+  .attr('x', datum => datum.children ? 0:(nodeRadius+3))
+  .attr('text-anchor', datum => datum.children ? 'middle':'left')
+  // we use our nodeRadius constant to calculate offsets for the labels & whether they are children to adjust location of labels
+
+
+
+
+  /*
+   * ignore this code below - it's for webpack to know that this
+   * code needs to be watched and not to append extra elements
+   */
+  if (module.hot) {
+      const duplicateNode = document.querySelector('svg');
+      module.hot.accept();
+      module.hot.dispose(() => {
+      if (duplicateNode) {
+        duplicateNode.parentNode.removeChild(duplicateNode);
+      }
+    });
+  }

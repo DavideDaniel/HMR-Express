@@ -1,28 +1,41 @@
 const data = {
-    name: "FS PAC",
+  name: "The Leadership Fund",
+  children: [{
+    name: "Donors",
     children: [{
-      name: "Donors",
+      name: "Monsanto"
+    }, {
+      name: "Republican State Leadership"
+    }, {
+      name: "J. Franklin Morse"
+    }, {
+      name: "Koch Industries, Inc."
+    }, {
+      name: "Committee to Elect Jeff Kruse"
+    }, {
+      name: "Friends of Ted Ferrioli"
+    }],
+  }, {
+    name: "Recipients",
+    children: [{
+      name: "Pacs",
       children: [{
-        name: "Mikael"
+        name: "Oregonians for Food & Shelter"
+      }, {
+        name: "Impact Oregon"
       }]
     }, {
-      name: "Recipients",
+      name: "Candidates",
       children: [{
-        name: "Pacs",
-        children: [{
-          name: "SumPac"
-        }, {
-          name: "YorePac"
-        }]
+        name: "Cliff Bentz"
       }, {
-        name: "Candidates",
-        children: [{
-          name: "Kate Brown"
-        }, {
-          name: "Charlie Hayles"
-        }]
+        name: "Carl Wilson"
+      }, {
+        name: "Patti Milne"
+      }, {
+        name: "Bruce Starr"
       }]
     }]
-  };
-
+  }]
+};
 export default data;

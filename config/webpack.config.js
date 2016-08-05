@@ -4,7 +4,7 @@ const webpack = require('webpack');
 
 module.exports = {
   devtool: 'cheap-module-source-map',
-  entry: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=10000', './src/main', './src/remove'],
+  entry: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=10000', './src/main'],
   output: {
     path: path.join(__dirname, '../public'),
     filename: 'bundle.js',
