@@ -23,3 +23,52 @@ svg g text {
   dy: 1em;
   /*text-anchor: middle;*/
 }
+
+#content{
+        background-color:ivory;
+        height: 700px;
+        width: 700px;
+        overflow: hidden;
+
+      }
+      .selected{
+        stroke:darkslategray;
+        fill: none;
+        stroke-width: 3px;
+      }
+
+      .reset-selected{
+        fill: none;
+        stroke: #ccc;
+        stroke-width: 1.5px;
+      }
+
+
+      .node {
+        cursor: pointer;
+      }
+
+
+      .node text {
+
+      text-rendering: optimizeLegibility;
+      font: 11px Helvetica, Arial, Verdana, sans-serif;
+      background-color: transparent;
+      color: #333;
+      -webkit-font-smoothing: antialiased;
+      font-weight: bold;
+
+      }
+
+      .link {
+        fill: none;
+        stroke: #ccc;
+        stroke-width: 1.5px;
+      }
+
+      #collapse-button{
+      float: right;
+      margin-right: 10px;
+      margin-top: 20px;
+
+      }
