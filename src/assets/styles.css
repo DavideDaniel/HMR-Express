@@ -24,8 +24,22 @@ svg g text {
   /*text-anchor: middle;*/
 }
 
-form {
-  position: absolute;
-  right: 10px;
-  top: 10px;
+.node {
+  cursor: pointer;
+}
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1px;
+}
+
+.node text {
+  font: 10px sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1px;
 }

@@ -3,54 +3,145 @@ import './assets/normalize.css';
 import './assets/styles.css';
 import data from './example';
 
-const width  = 480;
-const height = 250;
-const radius = Math.min(width, height) / 2;
-const color  = d3.scale.category20();
+const margin = {top: 20, right: 120, bottom: 20, left: 120},
+    width = 960 - margin.right - margin.left,
+    height = 800 - margin.top - margin.bottom;
 
-const pie    = d3.layout.pie()
-                .value(d => d.apples)
-                .sort(null);
+let i = 0,
+    duration = 750,
+    root;
 
-const arc    = d3.svg.arc()
-              .innerRadius(radius - 10)
-              .outerRadius(radius - 40);
+const tree = d3.layout.tree()
+    .size([height, width]);
 
-const svg    = d3.select("#content").append("svg")
-              .attr("width", width)
-              .attr("height", height)
-              .append("g")
-              .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+const diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.y, d.x]; });
+
+const svg = d3.select("#content").append("svg")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-let path     = svg.datum(data).selectAll("path")
-              .data(pie)
-              .enter().append("path")
-              .attr("fill", (d, i) => color(i))
-              .attr("d", arc)
-              .each(function(d){ return this._current = d; }); // store the initial angles
+  // if (error) throw error;
 
-d3.selectAll("input").on("change", change);
+  root = data;
+  root.x0 = height / 2;
+  root.y0 = 0;
 
-const timeout = setTimeout(() => d3.select("input[value=\"oranges\"]").property("checked", true).each(change), 2000);
+  function collapse(d) {
+    if (d.children) {
+      d._children = d.children;
+      d._children.forEach(collapse);
+      d.children = null;
+    }
+  }
 
-function change() {
-  const value = this.value;
-  clearTimeout(timeout);
-  pie.value(d => d[value]); // change the value function
-  path = path.data(pie); // compute the new angles
-  path.transition().duration(750).attrTween("d", arcTween); // redraw the arcs
+  root.children.forEach(collapse);
+  update(root);
+
+
+d3.select(self.frameElement).style("height", "800px");
+
+function update(source) {
+
+  // Compute the new tree layout.
+  const nodes = tree.nodes(root).reverse(),
+      links = tree.links(nodes);
+
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d) { d.y = d.depth * 180; });
+
+  // Update the nodes…
+  const node = svg.selectAll("g.node")
+      .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+  // Enter any new nodes at the parent's previous position.
+  const nodeEnter = node.enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+      .on("click", click);
+
+  nodeEnter.append("circle")
+      .attr("r", 1e-6)
+      .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+  nodeEnter.append("text")
+      .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+      .attr("dy", ".35em")
+      .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+      .text(function(d) { return d.name; })
+      .style("fill-opacity", 1e-6);
+
+  // Transition nodes to their new position.
+  const nodeUpdate = node.transition()
+      .duration(duration)
+      .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+  nodeUpdate.select("circle")
+      .attr("r", 4.5)
+      .style("fill", function(d) { return d._children ? "tomato" : "#fff"; });
+
+  nodeUpdate.select("text")
+      .style("fill-opacity", 1);
+
+  // Transition exiting nodes to the parent's new position.
+  const nodeExit = node.exit().transition()
+      .duration(duration)
+      .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+      .remove();
+
+  nodeExit.select("circle")
+      .attr("r", 1e-6);
+
+  nodeExit.select("text")
+      .style("fill-opacity", 1e-6);
+
+  // Update the links…
+  const link = svg.selectAll("path.link")
+      .data(links, function(d) { return d.target.id; });
+
+  // Enter any new links at the parent's previous position.
+  link.enter().insert("path", "g")
+      .attr("class", "link")
+      .attr("d", function(d) {
+        var o = {x: source.x0, y: source.y0};
+        return diagonal({source: o, target: o});
+      });
+
+  // Transition links to their new position.
+  link.transition()
+      .duration(duration)
+      .attr("d", diagonal);
+
+  // Transition exiting nodes to the parent's new position.
+  link.exit().transition()
+      .duration(duration)
+      .attr("d", function(d) {
+        var o = {x: source.x, y: source.y};
+        return diagonal({source: o, target: o});
+      })
+      .remove();
+
+  // Stash the old positions for transition.
+  nodes.forEach(function(d) {
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
 }
 
-// Store the displayed angles in _current.
-// Then, interpolate from _current to the new angles.
-// During the transition, _current is updated in-place by d3.interpolate.
-function arcTween(a) {
-  const i = d3.interpolate(this._current, a);
-  this._current = i(0);
-  return (t) => arc(i(t));
+// Toggle children on click.
+function click(d) {
+  if (d.children) {
+    d._children = d.children;
+    d.children = null;
+  } else {
+    d.children = d._children;
+    d._children = null;
+  }
+  update(d);
 }
-
 /*
  * ignore this code below - it's for webpack to know that this
  * code needs to be watched and not to append extra elements
