@@ -18,10 +18,17 @@ body {
   outline-width: 0;
 }
 
+svg {
+  margin: 0 auto;
+}
 svg g text {
   font: 12px 'Open Sans';
   dy: 1em;
-  /*text-anchor: middle;*/
+}
+
+#content {
+  width: 80%;
+  margin: 0 auto;
 }
 
 .node {
