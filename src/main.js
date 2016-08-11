@@ -2,8 +2,9 @@ import d3 from 'd3';
 import './assets/normalize.css';
 import './assets/styles.css';
 import data from './example';
-const url = 'https://gist.githubusercontent.com/d3byex/25129228aa50c30ef01f/raw/2f8664d0eb75ef606f412f9647116954ff0af41d/radial.json'; //url='https://gist.githubusercontent.com/d3byex/25129228aa50c30ef01f/raw/ddc1d7cf560f8fff84dd9005e5bdbdd43b39a91f/flare.json';
-d3.json(url, function (error, data) {
+const url = 'https://gist.githubusercontent.com/d3byex/25129228aa50c30ef01f/raw/2f8664d0eb75ef606f412f9647116954ff0af41d/radial.json';
+d3.json(url, (error, data) => {
+  console.log(data);
   const width = 600,
     height = 600,
     nodeRadius = 4.5;
@@ -61,7 +62,7 @@ d3.json(url, function (error, data) {
         return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)";
       }
     })
-    .style('font', '12px Open Sans')
+    .style('font', '10px Open Sans')
     .text(d => {
       return d.name;
     });
